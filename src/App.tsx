@@ -10,11 +10,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { format } from "date-fns";
+import { DialogCreate } from "./components/ui/dialogCreate/dialogCreate";
+
 interface Users {
   id: String;
   name: String;
   email: string;
   password: string;
+  createdAt: string;
 }
 
 function App() {
@@ -40,7 +44,11 @@ function App() {
     <div className="h-screen flex flex-col justify-center items-center">
       <main className="flex flex-col justify-center items-center gap-3">
         <h1>Cadastro de Usuarios</h1>
-        <div className="border-1 border-black rounded-2xl">
+
+        <div className="w-[800px] flex flex-row-reverse">
+          <DialogCreate />
+        </div>
+        <div className="border-1 border-black rounded-2xl w-[800px]">
           <Table className="">
             <TableCaption>Tabela de usuarios Cadastrados</TableCaption>
             <TableHeader>
@@ -48,16 +56,26 @@ function App() {
                 <TableHead className="w-[100px]">Nome</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Senha</TableHead>
+                <TableHead>Entrada</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tabelaUsers?.map((item) => (
-                <TableRow>
-                  <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell>{item.email}</TableCell>
-                  <TableCell>{item.password}</TableCell>
-                </TableRow>
-              ))}
+              {tabelaUsers && tabelaUsers.length > 0 ? (
+                tabelaUsers?.map((item) => (
+                  <TableRow>
+                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell>{item.email}</TableCell>
+                    <TableCell>{item.password}</TableCell>
+                    <TableCell>
+                      {format(new Date(item.createdAt), "dd/MM/yyyy")}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <>
+                  <h1>Nenhum Dado encontrado</h1>
+                </>
+              )}
             </TableBody>
           </Table>
         </div>
