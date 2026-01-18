@@ -12,6 +12,7 @@ import {
 
 import { format } from "date-fns";
 import { DialogCreate } from "./components/ui/dialogCreate/dialogCreate";
+import { EditUser } from "./components/ui/dialogCreate/dialogEdit";
 
 interface Users {
   id: String;
@@ -68,6 +69,9 @@ function App() {
                     <TableCell>{item.password}</TableCell>
                     <TableCell>
                       {format(new Date(item.createdAt), "dd/MM/yyyy")}
+                    </TableCell>
+                    <TableCell>
+                      <EditUser id={item.id as string} />
                     </TableCell>
                   </TableRow>
                 ))
