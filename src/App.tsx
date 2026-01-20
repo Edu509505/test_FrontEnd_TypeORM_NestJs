@@ -13,6 +13,9 @@ import {
 import { format } from "date-fns";
 import { DialogCreate } from "./components/ui/dialogCreate/dialogCreate";
 import { EditUser } from "./components/ui/dialogCreate/dialogEdit";
+import { Button } from "./components/ui/button";
+import { Trash2 } from "lucide-react";
+import { DeleteUser } from "./components/ui/dialogCreate/alertDialogDelete";
 
 interface Users {
   id: String;
@@ -36,7 +39,6 @@ function App() {
       if (!response.ok) throw new Error("Nenhum usuario foi encontrado");
 
       const data = await response.json();
-      console.log(data);
       return data as Users[];
     },
   });
@@ -70,8 +72,9 @@ function App() {
                     <TableCell>
                       {format(new Date(item.createdAt), "dd/MM/yyyy")}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="flex gap-2">
                       <EditUser id={item.id as string} />
+                      <DeleteUser id={item.id as string} />
                     </TableCell>
                   </TableRow>
                 ))

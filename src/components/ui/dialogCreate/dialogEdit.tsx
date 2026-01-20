@@ -23,8 +23,6 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Field, FieldError, FieldGroup, FieldLabel } from "../field";
 
-import { useParams } from "react-router-dom";
-
 import { Card, CardContent, CardFooter } from "../card";
 import { CircleCheckBigIcon, CircleX, Eye } from "lucide-react";
 import {
@@ -55,10 +53,23 @@ interface Props {
 function VisualizarEditUser({ id }: Props) {
   const url = "http://localhost:3000";
 
-  const { idS } = useParams<{ idS: string }>();
-
   // const [closerDialog, setCloserDialog] = useState<boolean>(false);
   // const [erroAoCadastrar, setErroAoCadastrar] = useState<boolean>(false);
+
+  const { data: tabelaUsers } = useSuspenseQuery({
+    queryKey: ["tabelaUserId", id],
+    queryFn: async () => {
+      const response = await fetch(`${url}/users/getUserId/${id}`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("Nenhum usuario foi encontrado");
+
+      const data = await response.json();
+      return data as Users;
+    },
+  });
 
   const queryClient = useQueryClient();
 
@@ -72,25 +83,9 @@ function VisualizarEditUser({ id }: Props) {
   const formCliet = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-    },
-  });
-
-  const { data: tabelaUsers } = useSuspenseQuery({
-    queryKey: ["tabela"],
-    queryFn: async () => {
-      const response = await fetch(`${url}/users/${id}`, {
-        method: "GET",
-        credentials: "include",
-      });
-
-      if (!response.ok) throw new Error("Nenhum usuario foi encontrado");
-
-      const data = await response.json();
-      console.log(data);
-      return data as Users;
+      name: tabelaUsers.name as string,
+      email: tabelaUsers.email,
+      password: tabelaUsers.password,
     },
   });
 
@@ -105,7 +100,6 @@ function VisualizarEditUser({ id }: Props) {
       });
       if (!response.ok) {
         const txt = await response.text();
-        console.log(data);
         throw new Error(txt || `Erro ${response.status}`);
       }
       return response.json();
@@ -118,16 +112,21 @@ function VisualizarEditUser({ id }: Props) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="cursor-pointer" onClick={() => formCliet.reset()}>
+        <Button
+          className="cursor-pointer"
+          onClick={() => {
+            (formCliet.reset(),
+              queryClient.invalidateQueries({ queryKey: ["tabelaUserId"] }));
+          }}
+        >
           <Eye /> Editar
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Adicionar um novo usuário</DialogTitle>
+          <DialogTitle>Atualizar Usuário existente</DialogTitle>
           <DialogDescription>
-            Digite as informações para adicionar um novo usuário O usuário é{" "}
-            {tabelaUsers.name} ""
+            Digite as informações para atualizar o usuario selecionado
           </DialogDescription>
         </DialogHeader>
         <Card className="w-full">
@@ -223,10 +222,10 @@ function VisualizarEditUser({ id }: Props) {
               >
                 {criarUsuario.isPending ? (
                   <>
-                    <Spinner /> Cadastrar
+                    <Spinner /> Atualizar
                   </>
                 ) : (
-                  "Cadastrar"
+                  "Atualizar"
                 )}
               </Button>
               {/* sucesso */}
